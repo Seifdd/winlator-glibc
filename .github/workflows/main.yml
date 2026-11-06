@@ -1,6 +1,21 @@
 name: Build Android APK
 
-on: [push, workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      replace_imagefs:
+        description: "Replace assets/imagefs.tzst with a custom rootfs"
+        type: boolean
+        default: false
+      rootfs_url:
+        description: "Direct URL of the .tzst (published release)"
+        type: string
+        default: ""
+      rootfs_sha256:
+        description: "SHA-256 of that file"
+        type: string
+        default: ""
+  push:
 
 jobs:
   build:
@@ -25,6 +40,18 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
+
+      - name: Replace imagefs
+        if: ${{ inputs.replace_imagefs }}
+        env:
+          ROOTFS_URL: ${{ inputs.rootfs_url }}
+          ROOTFS_SHA256: ${{ inputs.rootfs_sha256 }}
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o /tmp/imagefs.tzst "$ROOTFS_URL"
+          echo "$ROOTFS_SHA256  /tmp/imagefs.tzst" | sha256sum -c -
+          mkdir -p app/src/main/assets
+          cp /tmp/imagefs.tzst app/src/main/assets/imagefs.tzst
 
       - name: Build APK with Gradle
         run: |
