@@ -14,12 +14,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Install NDK and CMake Safely
+      - name: Install Exact NDK and CMake Required
         run: |
           export ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}
           export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
           yes | sdkmanager --licenses || true
-          yes | sdkmanager "ndk;25.2.9519653" "cmake;3.22.1" || true
+          yes | sdkmanager "ndk;26.1.10909125" "cmake;3.22.1" || true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
@@ -28,14 +28,6 @@ jobs:
         run: |
           chmod +x gradlew || gradle wrapper
           ./gradlew assembleDebug
-
-      - name: Print CMake Error Logs on Failure
-        if: failure()
-        run: |
-          echo "=== Searching for CMake Error Logs ==="
-          find app/.cxx -name "CMakeError.log" -exec echo "--- {} ---" \; -exec cat {} \;
-          find app/.cxx -name "CMakeConfigureLog.yaml" -exec echo "--- {} ---" \; -exec cat {} \;
-          find app/.cxx -name "configure_error.txt" -exec echo "--- {} ---" \; -exec cat {} \;
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
