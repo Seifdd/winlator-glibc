@@ -20,7 +20,7 @@ jobs:
       - name: Build APK with Gradle
         run: |
           chmod +x gradlew || gradle wrapper
-          ./gradlew assembleDebug || gradle assembleDebug
+          ./gradlew assembleDebug --info -Pandroid.externalNativeBuild.verbose=true
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
