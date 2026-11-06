@@ -1,0 +1,57 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      replace_imagefs:
+        description: "Replace assets/imagefs.tzst with a custom rootfs"
+        type: boolean
+        default: false
+      rootfs_url:
+        description: "Direct URL of the .tzst (published release)"
+        type: string
+        default: ""
+      rootfs_sha256:
+        description: "SHA-256 of that file"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Show assets
+        run: ls -la app/src/main/assets || true
+      - name: Replace imagefs
+        if: ${{ inputs.replace_imagefs }}
+        env:
+          ROOTFS_URL: ${{ inputs.rootfs_url }}
+          ROOTFS_SHA256: ${{ inputs.rootfs_sha256 }}
+        run: |
+          set -euo pipefail
+          curl -fL --retry 3 -o /tmp/imagefs.tzst "$ROOTFS_URL"
+          echo "$ROOTFS_SHA256  /tmp/imagefs.tzst" | sha256sum -c -
+          mkdir -p app/src/main/assets
+          cp /tmp/imagefs.tzst app/src/main/assets/imagefs.tzst
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk
+          path: app/build/outputs/apk/**/*.apk
+          if-no-files-found: error
