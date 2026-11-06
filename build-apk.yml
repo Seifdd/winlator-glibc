@@ -35,10 +35,8 @@ jobs:
 
       - name: Accept all SDK licenses
         run: |
-          SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
-          SDKM="$(ls -d "$SDK"/cmdline-tools/*/bin/sdkmanager | sort -V | tail -n1)"
-          echo "Using $SDKM"
-          yes | "$SDKM" --sdk_root="$SDK" --licenses > /dev/null || true
+          mkdir -p "${ANDROID_HOME}/licenses"
+          printf "24333f8a43b682823c07b106299f0d126107d30\nd56f5187479451eabf01fb78af6dfcb139a648b0\n84831b9409646a918e30573bab4c9c91346d8abd" > "${ANDROID_HOME}/licenses/android-sdk-license"
 
       - uses: gradle/actions/setup-gradle@v4
 
