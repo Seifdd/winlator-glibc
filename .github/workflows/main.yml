@@ -14,11 +14,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Setup Android SDK & NDK
-        uses: android-actions/setup-android@v3
-        with:
-          ndk-version: '25.2.9519653'
-          cmake-version: '3.22.1'
+      - name: Install NDK and CMake Safely
+        run: |
+          export ANDROID_HOME=${ANDROID_HOME:-/usr/local/lib/android/sdk}
+          export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
+          yes | sdkmanager --licenses || true
+          yes | sdkmanager "ndk;25.2.9519653" "cmake;3.22.1" || true
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
