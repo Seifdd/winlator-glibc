@@ -33,7 +33,6 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      # The GitHub runner already ships the Android SDK; just accept its licenses.
       - name: Accept all SDK licenses
         run: |
           SDK="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
@@ -64,7 +63,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --stacktrace --no-daemon 2>&1 | tee build.log
 
-      - name: Error summary (last lines of the log)
+      - name: Error summary
         if: failure()
         run: |
           {
