@@ -24,10 +24,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v3
 
-      - name: Build APK with Gradle
+      - name: Build APK with Gradle (Verbose)
         run: |
           chmod +x gradlew || gradle wrapper
-          ./gradlew assembleDebug
+          ./gradlew assembleDebug --info -Pandroid.externalNativeBuild.verbose=true
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
